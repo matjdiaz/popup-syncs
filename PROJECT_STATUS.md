@@ -1,7 +1,8 @@
 # PROJECT_STATUS.md — Welcome Popup Sync
 
-> **Última actualización:** 17 de Septiembre, 2026  
+> **Última actualización:** 20 de Septiembre, 2026  
 > **Estado general:** En producción y activo (`newspopup.vadigu.com`)  
+> **Repositorio GitHub:** `https://github.com/matjdiaz/popup-syncs` (`main`)  
 > **Stack principal:** React 19, Vite 7, Supabase (PostgreSQL + Auth + Storage), Vanilla JS Loader
 
 ---
@@ -149,6 +150,11 @@ Welcome Popup Sync/
 
 ## 6. Bitácora de Cambios Técnicos Recientes
 
+- **2026-09-20:**
+  - Inicialización del repositorio Git local con rama principal `main` y configuración de autor (`Matias Javier Diaz <mdiaz@vadigu.com>`).
+  - Vinculación con repositorio remoto en GitHub: `https://github.com/matjdiaz/popup-syncs.git`.
+  - Configuración y saneamiento de `.gitignore` para excluir `node_modules/`, `dist/`, `.env*`, `.vercel/`, temporales y zips de exportación.
+  - Generación del commit inicial y sincronización (`git push -u origin main`).
 - **2026-09-17:**
   - Creación del archivo de living documentation `PROJECT_STATUS.md` conforme a las directivas globales del espacio de trabajo.
   - Relevamiento y consolidación de la arquitectura multi-tenant, esquema de Supabase y flujo de emergencias.
