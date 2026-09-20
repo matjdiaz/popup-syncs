@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página de Prueba - Welcome Popup</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+            text-align: center;
+        }
+        h1 { color: #0f172a; }
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            max-width: 600px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #1d4ed8; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>Página de Prueba Vercel</h1>
+        <p>Esta es una página web simulada alojada en <b>vadigu-news.vercel.app</b>.</p>
+        <p>Si el sistema funciona correctamente, el popup debería aparecer automáticamente al cargar esta página (si tienes mensajes activos configurados para este dominio).</p>
+        
+        <button onclick="localStorage.removeItem('_app_v_pref'); window.location.reload();">
+            Borrar Sesión y Recargar
+        </button>
+        <p style="font-size: 12px; color: #64748b; margin-top: 10px;">(Usa este botón para forzar que el popup vuelva a salir)</p>
+    </div>
+
+    <!-- Script del Cargador -->
+    <script>
+        (function(){
+            var s = document.createElement('script');
+            // Usamos ruta relativa para que cargue desde Vercel
+            s.src = "/welcome-loader.js?v=" + Date.now(); 
+            // Forzamos el ID de cliente a vadigu-news.vercel.app
+            s.setAttribute("data-client-id", "vadigu-news.vercel.app");
+            document.head.appendChild(s);
+        })();
+    </script>
+</body>
+</html>

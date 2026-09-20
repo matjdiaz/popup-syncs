@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WelcomeSync Storage Bridge</title>
+    <script>
+        (function() {
+            const STORAGE_KEY = "_app_v_pref";
+            
+            // IndexedDB Helpers
+            const DB_NAME = 'WelcomeSyncVault';
+            const STORE_NAME = 'Vault';
+
+            function idbGet(key) {
+                return new Promise((resolve) => {
+                    const request = indexedDB.open(DB_NAME, 1);
+                    request.onupgradeneeded = (e) => e.target.result.createObjectStore(STORE_NAME);
+                    request.onsuccess = (e) => {
+                        const db = e.target.result;
+                        const tx = db.transaction(STORE_NAME, 'readonly');
+                        const store = tx.objectStore(STORE_NAME);
+                        const getReq = store.get(key);
+                        getReq.onsuccess = () => resolve(getReq.result);
+                        getReq.onerror = () => resolve(null);
+                    };
+                    request.onerror = () => resolve(null);
+                });
+            }
+
+            function idbSet(key, value) {
+                return new Promise((resolve) => {
+                    const request = indexedDB.open(DB_NAME, 1);
+                    request.onupgradeneeded = (e) => e.target.result.createObjectStore(STORE_NAME);
+                    request.onsuccess = (e) => {
+                        const db = e.target.result;
+                        const tx = db.transaction(STORE_NAME, 'readwrite');
+                        const store = tx.objectStore(STORE_NAME);
+                        store.put(value, key);
+                        tx.oncomplete = () => resolve(true);
+                    };
+                });
+            }
+
+            window.addEventListener('message', async function(event) {
+                // Aquí podrías añadir una validación de origin si quieres más seguridad
+                // if (event.origin !== "https://app.sanjuan.gob.ar") return;
+
+                const { type, key, value, requestId } = event.data;
+
+                if (type === 'GET_PREF') {
+                    const val = localStorage.getItem(STORAGE_KEY) || await idbGet(STORAGE_KEY);
+                    event.source.postMessage({ type: 'PREF_VALUE', value: val, requestId }, event.origin);
+                } 
+                else if (type === 'SET_PREF') {
+                    localStorage.setItem(STORAGE_KEY, value);
+                    await idbSet(STORAGE_KEY, value);
+                    event.source.postMessage({ type: 'PREF_SAVED', requestId }, event.origin);
+                }
+            });
+
+            // Avisar que el bridge está listo
+            window.parent.postMessage({ type: 'BRIDGE_READY' }, '*');
+        })();
+    </script>
+</head>
+<body></body>
+</html>
