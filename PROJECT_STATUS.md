@@ -152,6 +152,8 @@ Welcome Popup Sync/
 
 - **2026-10-08:**
   - Fix en `public/welcome-loader.js`: el iframe de YouTube/PDF se renderizaba en su tamaño por defecto (300x150) dentro del contenedor 16:9. Se agregó regla CSS `.w-sync-video-container iframe, .w-sync-pdf-container iframe` con `position:absolute` + `width/height:100%` (`!important` para resistir CSS del sitio host).
+  - Desplegado con `vercel --prod` (proyecto `vadigu-news`). **Nota:** el push a GitHub NO dispara deploy automático; hay que desplegar con la CLI. La CLI puede mostrar `Not authorized` al consultar el estado del build aunque el deploy quede en `Ready` (verificar con `vercel inspect`).
+  - Logo del popup centrado en `renderMessage()` (`display:block; margin:0 auto`).
 - **2026-09-20:**
   - Inicialización del repositorio Git local con rama principal `main` y configuración de autor (`Matias Javier Diaz <mdiaz@vadigu.com>`).
   - Vinculación con repositorio remoto en GitHub: `https://github.com/matjdiaz/popup-syncs.git`.

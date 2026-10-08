@@ -242,7 +242,7 @@
         const embedUrl = msg.videoUrl ? getEmbedUrl(msg.videoUrl) : null;
         const html = `
             <div style="font-family: system-ui, -apple-system, sans-serif;">
-                ${msg.logoUrl ? `<img src="${msg.logoUrl}" style="max-height:45px; margin-bottom:12px; border-radius:6px;" />` : ''}
+                ${msg.logoUrl ? `<img src="${msg.logoUrl}" style="display:block !important; max-height:45px; max-width:100%; margin:0 auto 12px auto !important; border-radius:6px;" />` : ''}
                 ${msg.isUrgent ? `<div style="color:#e11d48; font-weight:800; font-size:12px; letter-spacing:1px; margin-bottom:8px;">URGENTE</div>` : ''}
                 <h1 class="w-sync-title">${msg.title}</h1>
                 <div class="w-sync-desc">${msg.message.replace(/\\n/g, '<br/>')}</div>
