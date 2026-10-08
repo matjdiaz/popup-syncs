@@ -150,6 +150,8 @@ Welcome Popup Sync/
 
 ## 6. Bitácora de Cambios Técnicos Recientes
 
+- **2026-10-08:**
+  - Fix en `public/welcome-loader.js`: el iframe de YouTube/PDF se renderizaba en su tamaño por defecto (300x150) dentro del contenedor 16:9. Se agregó regla CSS `.w-sync-video-container iframe, .w-sync-pdf-container iframe` con `position:absolute` + `width/height:100%` (`!important` para resistir CSS del sitio host).
 - **2026-09-20:**
   - Inicialización del repositorio Git local con rama principal `main` y configuración de autor (`Matias Javier Diaz <mdiaz@vadigu.com>`).
   - Vinculación con repositorio remoto en GitHub: `https://github.com/matjdiaz/popup-syncs.git`.
