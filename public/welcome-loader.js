@@ -39,6 +39,13 @@
         .w-sync-desc { color: #475569 !important; line-height: 1.6 !important; margin-bottom: 24px !important; font-size: 18px !important; font-family: system-ui, -apple-system, sans-serif !important; text-align: center !important; }
         .w-sync-desc img { max-width: 100% !important; height: auto !important; border-radius: 12px !important; margin: 12px 0 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important; display: inline-block !important; }
         .w-sync-video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 16px; margin-bottom: 2rem; background: #000; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .w-sync-video-facade { cursor: pointer; user-select: none; }
+        .w-sync-video-facade img.w-sync-video-thumb { position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; object-fit: cover !important; transition: transform 0.4s ease, filter 0.4s ease !important; }
+        .w-sync-video-facade:hover img.w-sync-video-thumb { transform: scale(1.03) !important; filter: brightness(0.9) !important; }
+        .w-sync-video-play-btn { position: absolute !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 68px !important; height: 68px !important; background: rgba(15, 23, 42, 0.75) !important; backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important; transition: all 0.3s ease !important; border: 2px solid rgba(255, 255, 255, 0.4) !important; z-index: 2 !important; }
+        .w-sync-video-play-btn svg { fill: #ffffff !important; width: 28px !important; height: 28px !important; margin-left: 3px !important; }
+        .w-sync-video-facade:hover .w-sync-video-play-btn { transform: translate(-50%, -50%) scale(1.12) !important; background: #10b981 !important; border-color: #10b981 !important; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4) !important; }
+        .w-sync-video-badge { position: absolute !important; bottom: 12px !important; left: 14px !important; background: rgba(15, 23, 42, 0.7) !important; backdrop-filter: blur(4px) !important; -webkit-backdrop-filter: blur(4px) !important; color: #ffffff !important; padding: 4px 10px !important; border-radius: 6px !important; font-size: 11px !important; font-weight: 700 !important; display: flex !important; align-items: center !important; letter-spacing: 0.5px !important; text-transform: uppercase !important; z-index: 2 !important; }
         .w-sync-pdf-container { position: relative; padding-bottom: 120%; height: 0; overflow: hidden; margin-bottom: 24px; }
         .w-sync-video-container iframe, .w-sync-pdf-container iframe { position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; max-width: none !important; border: 0 !important; margin: 0 !important; }
         .w-sync-footer { border-top: 1px solid #f1f5f9 !important; padding: 16px 32px 24px 32px !important; display: flex !important; flex-direction: column !important; gap: 16px !important; width: 100% !important; box-sizing: border-box !important; }
@@ -82,13 +89,28 @@
     }
 
     // --- Utils ---
+    function getYoutubeId(url) {
+        if (!url) return null;
+        var match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+        return match ? match[1] : null;
+    }
+
+    function isDirectVideo(url) {
+        if (!url) return false;
+        var clean = url.split('?')[0].toLowerCase();
+        return clean.endsWith('.mp4') || clean.endsWith('.webm') || clean.endsWith('.mov') || clean.endsWith('.m4v');
+    }
+
     function getEmbedUrl(url) {
         if (!url) return null;
-        let videoId = '';
-        if (url.includes('youtube.com/watch')) { videoId = new URL(url).searchParams.get('v'); } 
-        else if (url.includes('youtu.be/')) { videoId = url.split('youtu.be/')[1].split('?')[0]; } 
-        else if (url.includes('drive.google.com/file/d/')) { return url.replace('/view', '/preview').split('?')[0]; }
-        return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}` : url;
+        var ytId = getYoutubeId(url);
+        if (ytId) {
+            return `https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1`;
+        }
+        if (url.includes('drive.google.com/file/d/')) {
+            return url.replace('/view', '/preview').split('?')[0];
+        }
+        return url;
     }
     
     function getPdfEmbedUrl(url) {
@@ -238,8 +260,59 @@
         };
     };
 
+    window.wSyncPlayVideo = function(container, videoId) {
+        if (!container || !videoId) return;
+        var iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1`;
+        iframe.setAttribute('allowfullscreen', 'true');
+        iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+        iframe.style.position = 'absolute';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = '0';
+        
+        container.innerHTML = '';
+        container.appendChild(iframe);
+        container.classList.remove('w-sync-video-facade');
+        container.onclick = null;
+        container.style.cursor = 'default';
+    };
+
     function renderMessage(msg, isHistoryView = false) {
-        const embedUrl = msg.videoUrl ? getEmbedUrl(msg.videoUrl) : null;
+        let videoMarkup = '';
+        if (msg.videoUrl) {
+            const ytId = getYoutubeId(msg.videoUrl);
+            if (ytId) {
+                videoMarkup = `
+                    <div class="w-sync-video-container w-sync-video-facade" onclick="wSyncPlayVideo(this, '${ytId}')" title="Reproducir video">
+                        <img src="https://img.youtube.com/vi/${ytId}/hqdefault.jpg" class="w-sync-video-thumb" alt="Miniatura de video" />
+                        <div class="w-sync-video-play-btn">
+                            <svg viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+                        </div>
+                        <div class="w-sync-video-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block; vertical-align:middle; margin-right:4px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            Ver video
+                        </div>
+                    </div>
+                `;
+            } else if (isDirectVideo(msg.videoUrl)) {
+                videoMarkup = `
+                    <div class="w-sync-video-container" style="background:#000;">
+                        <video src="${msg.videoUrl}" controls playsinline style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain;"></video>
+                    </div>
+                `;
+            } else {
+                const embedUrl = getEmbedUrl(msg.videoUrl);
+                videoMarkup = embedUrl ? `
+                    <div class="w-sync-video-container">
+                        <iframe src="${embedUrl}" allowfullscreen></iframe>
+                    </div>
+                ` : '';
+            }
+        }
+
         const html = `
             <div style="font-family: system-ui, -apple-system, sans-serif;">
                 ${msg.logoUrl ? `<img src="${msg.logoUrl}" style="display:block !important; max-height:45px; max-width:100%; margin:0 auto 12px auto !important; border-radius:6px;" />` : ''}
@@ -247,11 +320,7 @@
                 <h1 class="w-sync-title">${msg.title}</h1>
                 <div class="w-sync-desc">${msg.message.replace(/\\n/g, '<br/>')}</div>
                 
-                ${embedUrl ? `
-                    <div class="w-sync-video-container">
-                        <iframe src="${embedUrl}" allowfullscreen></iframe>
-                    </div>
-                ` : (msg.mainImageUrl && (msg.mainImageUrl.toLowerCase().endsWith('.pdf') || msg.mainImageUrl.includes('drive.google.com/file/d/'))) ? `
+                ${videoMarkup ? videoMarkup : (msg.mainImageUrl && (msg.mainImageUrl.toLowerCase().endsWith('.pdf') || msg.mainImageUrl.includes('drive.google.com/file/d/'))) ? `
                     <div class="w-sync-pdf-container">
                         <iframe src="${getPdfEmbedUrl(msg.mainImageUrl)}"></iframe>
                     </div>

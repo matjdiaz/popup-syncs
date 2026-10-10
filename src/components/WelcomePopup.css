@@ -249,3 +249,85 @@
 .welcome-popup-image-container:hover .welcome-popup-image-hint {
     opacity: 1;
 }
+
+/* Video Facade / Clean Loader */
+.welcome-popup-video-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    background: #000;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.welcome-popup-video-facade {
+    cursor: pointer;
+    user-select: none;
+}
+
+.welcome-popup-video-thumb {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+.welcome-popup-video-facade:hover .welcome-popup-video-thumb {
+    transform: scale(1.03);
+    filter: brightness(0.9);
+}
+
+.welcome-popup-video-play-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 68px;
+    height: 68px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    z-index: 2;
+}
+
+.welcome-popup-video-play-btn svg {
+    margin-left: 2px;
+}
+
+.welcome-popup-video-facade:hover .welcome-popup-video-play-btn {
+    transform: translate(-50%, -50%) scale(1.12);
+    background: #10b981;
+    border-color: #10b981;
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.45);
+}
+
+.welcome-popup-video-badge {
+    position: absolute;
+    bottom: 12px;
+    left: 14px;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    color: #ffffff;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    z-index: 2;
+}

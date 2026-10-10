@@ -150,6 +150,13 @@ Welcome Popup Sync/
 
 ## 6. Bitácora de Cambios Técnicos Recientes
 
+- **2026-10-09:**
+  - **Optimización de Videos y Fachada Limpia (Clean Facade / Click-to-Play):**
+    - Se implementó un contenedor inteligente en `public/welcome-loader.js` y `src/components/WelcomePopup.jsx` que oculta todos los botones invasivos de YouTube en la carga inicial (evita títulos gigantes, logos de canal, botones de compartir y sugerencias no deseadas).
+    - Muestra una portada en alta definición del video (`hqdefault.jpg`) con un botón de *Play* central de estilo *glassmorphism* que destaca en verde esmeralda (`#10b981`) al interactuar.
+    - Al hacer clic, monta dinámicamente el reproductor de YouTube inyectando los parámetros más limpios permitidos por Google: `autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1`. Al ser iniciado por interacción directa del usuario, el navegador habilita el sonido de forma nativa.
+    - Soporte adicional para URLs directas de video (`.mp4`, `.webm`, etc.), renderizando un reproductor nativo HTML5 `<video controls playsinline>` 100% limpio y libre de marcas externas.
+    - Estilos agregados en `public/welcome-loader.js` y `src/components/WelcomePopup.css`.
 - **2026-10-08:**
   - Fix en `public/welcome-loader.js`: el iframe de YouTube/PDF se renderizaba en su tamaño por defecto (300x150) dentro del contenedor 16:9. Se agregó regla CSS `.w-sync-video-container iframe, .w-sync-pdf-container iframe` con `position:absolute` + `width/height:100%` (`!important` para resistir CSS del sitio host).
   - Desplegado con `vercel --prod` (proyecto `vadigu-news`). **Nota:** el push a GitHub NO dispara deploy automático; hay que desplegar con la CLI. La CLI puede mostrar `Not authorized` al consultar el estado del build aunque el deploy quede en `Ready` (verificar con `vercel inspect`).

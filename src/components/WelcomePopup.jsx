@@ -10,6 +10,11 @@ export function WelcomePopup({ localConfig, previewData = null, onPreviewClose =
     const [dontShowAgain, setDontShowAgain] = useState(false);
     const [currentUpdateId, setCurrentUpdateId] = useState(null);
     const [zoomUrl, setZoomUrl] = useState(null);
+    const [isPlayingVideo, setIsPlayingVideo] = useState(false);
+
+    useEffect(() => {
+        setIsPlayingVideo(false);
+    }, [currentMsgIndex, previewData]);
 
     // Efecto para carga normal (Producción/Background)
     useEffect(() => {
@@ -57,17 +62,25 @@ export function WelcomePopup({ localConfig, previewData = null, onPreviewClose =
         setIsOpen(false);
     };
 
-    const getEmbedUrl = (url) => {
+    const getYoutubeId = (url) => {
+        if (!url) return null;
+        const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+        return match ? match[1] : null;
+    };
+
+    const isDirectVideo = (url) => {
+        if (!url) return false;
+        const clean = url.split('?')[0].toLowerCase();
+        return clean.endsWith('.mp4') || clean.endsWith('.webm') || clean.endsWith('.mov') || clean.endsWith('.m4v');
+    };
+
+    const getEmbedUrl = (url, autoplay = 0) => {
         if (!url) return null;
 
         // YouTube logic
-        if (url.includes('youtube.com/watch?v=')) {
-            const id = url.split('v=')[1]?.split('&')[0];
-            return `https://www.youtube.com/embed/${id}`;
-        }
-        if (url.includes('youtu.be/')) {
-            const id = url.split('youtu.be/')[1]?.split('?')[0];
-            return `https://www.youtube.com/embed/${id}`;
+        const ytId = getYoutubeId(url);
+        if (ytId) {
+            return `https://www.youtube.com/embed/${ytId}?autoplay=${autoplay}&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1`;
         }
 
         // Drive logic
@@ -76,7 +89,7 @@ export function WelcomePopup({ localConfig, previewData = null, onPreviewClose =
             return `https://drive.google.com/file/d/${id}/preview`;
         }
 
-        return null;
+        return url;
     };
 
     const formatMessage = (text) => {
@@ -88,7 +101,9 @@ export function WelcomePopup({ localConfig, previewData = null, onPreviewClose =
     if (!isOpen || remoteMessages.length === 0) return null;
 
     const msg = remoteMessages[currentMsgIndex];
-    const embedUrl = getEmbedUrl(msg.videoUrl);
+    const ytId = getYoutubeId(msg.videoUrl);
+    const isDirect = isDirectVideo(msg.videoUrl);
+    const embedUrl = getEmbedUrl(msg.videoUrl, isPlayingVideo ? 1 : 0);
 
     return (
         <div className="welcome-popup-overlay">
@@ -107,16 +122,57 @@ export function WelcomePopup({ localConfig, previewData = null, onPreviewClose =
                     <h2 className="welcome-popup-title">{msg.title}</h2>
                     <div className="welcome-popup-message" dangerouslySetInnerHTML={{ __html: formatMessage(msg.message) }} />
 
-                    {embedUrl ? (
-                        <div className="welcome-popup-video-container" style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '12px', marginBottom: '1.5rem' }}>
-                            <iframe
-                                src={embedUrl}
-                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                                title="Video de Bienvenida"
-                            />
-                        </div>
+                    {msg.videoUrl ? (
+                        ytId ? (
+                            !isPlayingVideo ? (
+                                <div 
+                                    className="welcome-popup-video-container welcome-popup-video-facade" 
+                                    onClick={() => setIsPlayingVideo(true)}
+                                    title="Reproducir video"
+                                >
+                                    <img 
+                                        src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} 
+                                        alt="Miniatura de video" 
+                                        className="welcome-popup-video-thumb" 
+                                    />
+                                    <div className="welcome-popup-video-play-btn">
+                                        <PlayCircle size={38} color="#ffffff" style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))' }} />
+                                    </div>
+                                    <div className="welcome-popup-video-badge">
+                                        <span>Ver video</span>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="welcome-popup-video-container">
+                                    <iframe
+                                        src={getEmbedUrl(msg.videoUrl, 1)}
+                                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        title="Video de Bienvenida"
+                                    />
+                                </div>
+                            )
+                        ) : isDirect ? (
+                            <div className="welcome-popup-video-container" style={{ background: '#000' }}>
+                                <video 
+                                    src={msg.videoUrl} 
+                                    controls 
+                                    playsInline 
+                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain' }}
+                                />
+                            </div>
+                        ) : embedUrl ? (
+                            <div className="welcome-popup-video-container">
+                                <iframe
+                                    src={embedUrl}
+                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    title="Video de Bienvenida"
+                                />
+                            </div>
+                        ) : null
                     ) : (msg.mainImageUrl && (msg.mainImageUrl.toLowerCase().endsWith('.pdf') || msg.mainImageUrl.includes('drive.google.com/file/d/'))) ? (
                         <div style={{ marginBottom: '24px' }}>
                             <div style={{ position: 'relative', paddingBottom: '120%', height: 0, overflow: 'hidden', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', marginBottom: '10px' }}>
